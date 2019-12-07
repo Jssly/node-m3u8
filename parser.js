@@ -71,7 +71,7 @@ m3uParser.prototype.addItem = function addItem(item) {
   return item;
 };
 
- m3u8.prototype['EXT-X-KEY'] = function parseInf(data) {
+m3uParser.prototype['EXT-X-KEY'] = function parseInf(data) {
    this.xkey = data;
  };
 
