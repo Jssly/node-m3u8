@@ -71,37 +71,35 @@ m3uParser.prototype.addItem = function addItem(item) {
   return item;
 };
 
-m3uParser.prototype['EXT-X-KEY'] = function parseInf(data) {
-   this.xkey = data;
- };
+m3uParser.prototype['EXT-X-KEY'] = function parseInf (data) {
+  this.xkey = data
+  this.m3u.set('EXT-X-KEY', data)
+  var xkey = parseXkey(data)
+  this.emit('xkey', xkey)
+};
 
-m3uParser.prototype['EXTINF'] = function parseInf(data) {
-  this.addItem(new PlaylistItem);
+m3uParser.prototype['EXTINF'] = function parseInf (data) {
+  this.addItem(new PlaylistItem)
 
-  data = data.split(',');
+  data = data.split(',')
   if (this.xkey) {
-
-    let mc = this.xkey.match(/URI="(.*?)"/);
-    if (mc && mc.length > 0) {
-        this.currentItem.key = mc[1];
-    }
-    mc = this.xkey.match(/IV=(.*)/);
-    if (mc && mc.length > 0) {
-       this.currentItem.iv = mc[1];
-    }
+    var xkey = parseXkey(this.xkey)
+    this.currentItem.key = xkey.URI
+    this.currentItem.iv = xkey.IV
   }
-    
-  this.currentItem.set('duration', parseFloat(data[0]));
-  this.currentItem.set('title', data[1]);
+
+  this.currentItem.set('duration', parseFloat(data[0]))
+  this.currentItem.set('title', data[1])
   if (this.playlistDiscontinuity) {
-    this.currentItem.set('discontinuity', true);
-    this.playlistDiscontinuity = false;
+    this.currentItem.set('discontinuity', true)
+    this.playlistDiscontinuity = false
   }
 };
 
+
 m3uParser.prototype['EXT-X-DISCONTINUITY'] = function parseInf() {
   this.playlistDiscontinuity = true;
-}
+};
 
 m3uParser.prototype['EXT-X-BYTERANGE'] = function parseByteRange(data) {
   this.currentItem.set('byteRange', data);
@@ -133,4 +131,17 @@ m3uParser.prototype.parseAttributes = function parseAttributes(data) {
       value : keyValue[1]
     };
   });
+};
+
+var parseXkey = function (data) {
+  var rtn = {}
+  var mc = data.match(/URI="(.*?)"/)
+  if (mc && mc.length > 0) {
+    rtn.URI = mc[1]
+  }
+  mc = data.match(/IV=(.*)/)
+  if (mc && mc.length > 0) {
+    rtn.IV = mc[1]
+  }
+  return rtn
 };
